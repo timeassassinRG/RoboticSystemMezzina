@@ -1,1 +1,1 @@
-Grafico con Start, Punti Voronoi ed End (senza Ostacoli)
+0.82

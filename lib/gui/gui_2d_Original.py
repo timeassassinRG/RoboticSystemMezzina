@@ -56,19 +56,6 @@ class CartWindow(QWidget):
         qp.drawText(910, 60, "Th = %6.3f deg" % (math.degrees(theta)))
         qp.drawText(910, 80, "T  = %6.3f s" % (self.compound_system.t))
 
-        # Disegna gli ostacoli statici
-        qp.setPen(Qt.red)
-        qp.setBrush(Qt.red)
-        obstacles = [(0.25, 0.35), (0.4, 0.05), (0.55, 0.25), (0.82, 0.15), (0.80, 0.35)]
-
-        for obstacle in obstacles:
-            x_obstacle = int(50 + obstacle[0] * 1000)
-            y_obstacle = int(500 - obstacle[1] * 1000)
-            qp.drawRect(x_obstacle - 5, y_obstacle - 5, 10, 10)
-            # Aggiungi il testo con le coordinate sopra l'ostacolo
-            obstacle_text = f'Obstacle({obstacle[0]:.2f}, {obstacle[1]:.2f})'
-            qp.drawText(x_obstacle - 20, y_obstacle - 20, obstacle_text)
-        
         s = self.robot_pic.size()
 
         x_pos = int(50 + x * 1000 - s.width() / 2)
@@ -83,7 +70,6 @@ class CartWindow(QWidget):
         qp.drawPixmap(x_pos, y_pos, self.robot_pic)
 
         qp.end()
-
 
 
 def main():

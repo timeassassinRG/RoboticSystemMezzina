@@ -13,7 +13,11 @@ from lib.controllers.control2d import Polar2DController, StraightLine2DMotion, P
 from lib.gui.gui_2d import CartWindow
 from lib.data.plot import DataPlotter
 
-
+"""
+    NEL SEGUENTE CODICE APRENDO LA GUI SARANNO PRESENTI DEGLI OSTACOLI, AL MOMENTO NON SONO PRESI IN COSIDERAZIONE
+    SONO PRESI IN CONSIDERAZIONE NEL CODICE 3.AckermannSteering+phidias.py.
+    Questo codice è per mostrare la taratura dei controllori
+"""
 
 #definizione delle costanti fornite dal testo del progetto
 MASS = 15               # Massa del robot = 15kg
@@ -34,18 +38,19 @@ class AckermannRobot(RoboticSystem):
         # aggiungiamo controller di velocità 20 Nm max, antiwindup
         self.speed_controller = PIDSat(80, 10, 0, TORQUE_MAX, True)
         # aggiungiamo controller di posizione
-        self.polar_controller = Polar2DController(2.0, V_MAX, 10.0, math.pi / 4) # steering max = 90 deg
+        self.polar_controller = Polar2DController(2.0, V_MAX, 10.0, math.pi/3)
         # aggiungiamo il percorso
-        self.trajectory = Path2D(V_MAX, ACC, DEC, 0.001) # tolerance 0.1cm
+        self.path_controller = Path2D(V_MAX, ACC, DEC, 0.01)
         
-        self.trajectory.set_path( [ (0.25, 0.1), (0.40, 0.25), (0.65, 0.30)] )
+        self.path_controller.set_path( [ (0.25, 0.1), (0.40, 0.25), (0.65, 0.30)] )
         (x,y,_) = self.get_pose()
-        self.trajectory.start( (x,y) )
+        self.path_controller.start( (x,y) )
 
         self.plotter = DataPlotter()
     
     def run(self):
-        (x_target, y_target) = self.trajectory.evaluate(self.delta_t, self.get_pose())
+        '''
+        (x_target, y_target) = self.path_controller.evaluate(self.delta_t, self.get_pose())
         (vref, steering) = self.polar_controller.evaluate(self.delta_t, x_target, y_target, self.get_pose())
 
         if vref < 0:
@@ -54,6 +59,20 @@ class AckermannRobot(RoboticSystem):
         (v, w) = self.get_speed()
         torque = self.speed_controller.evaluate(self.delta_t, vref, v)
         self.car.evaluate(self.delta_t, torque, steering)
+        '''
+        pose = self.get_pose()
+        target = self.path_controller.evaluate(self.delta_t, pose)
+        if target is not None:
+            (x_target, y_target) = target
+            (vref, steering) = self.polar_controller.evaluate(self.delta_t, x_target, y_target, self.get_pose())
+            if vref < 0:
+                steering = -steering
+            torque = self.speed_controller.evaluate(self.delta_t, vref, self.car.v)
+            self.car.evaluate(self.delta_t, torque, steering)
+        else:
+            self.plot_data()
+            return False
+        
         (x,y,_) = self.get_pose()
         self.plotter.add('t', self.t)
         self.plotter.add('x_target', x_target)
@@ -62,10 +81,14 @@ class AckermannRobot(RoboticSystem):
         self.plotter.add('y', y)
         self.plotter.add('Torque', torque)
         self.plotter.add('vref', vref)
-        self.plotter.add('v', v)
+        self.plotter.add('v', self.car.v)
     
         if self.t > 10:
-            #ploot x target and x position
+            self.plot_data()
+        return True
+    
+    def plot_data(self):
+        #ploot x target and x position
             self.plotter.plot ( [ 't', 'Time' ], [ [ 'x', 'X' ],
                                                    [ 'x_target', 'X Target']])
             #plot y target and y position
@@ -76,9 +99,8 @@ class AckermannRobot(RoboticSystem):
             self.plotter.plot ( [ 't', 'Time' ], [ [ 'Torque', 'Torque'] ])
             self.plotter.plot ( [ 't', 'Time' ], [ [ 'v', 'V' ],
                                                    [ 'vref', 'Vref'] ])
-            self.plotter.show()   
+            self.plotter.show()  
             return False
-        return True
     
     def get_pose(self):
         return self.car.get_pose()

@@ -35,7 +35,7 @@ class AckermannRobot(RoboticSystem):
         self.trajectory = Path2D(0.1, 2, 2, 0.001)
         (x,y,_) = self.get_pose()
         #self.trajectory.start_motion( (x,y), (0.4, 0.4) )
-        self.trajectory.set_path( [ (0.27, 0.1), (0.19, 0.025) ] )
+        self.trajectory.set_path( [ (0.2, 0.2),(0.25, 0.25),(0.5, 0.49),(0.73, 0.49),(0.83, 0.58),(0.69, 0.79),(0.86, 0.86), (0.8, 0.8) ] )
         self.trajectory.start( (x,y) )
         self.plotter = DataPlotter()
 

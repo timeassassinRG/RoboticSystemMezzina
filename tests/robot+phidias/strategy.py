@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 CURRENT_POSITION = Path(__file__).parent
 sys.path.append(f"{CURRENT_POSITION}/../../")
+print(CURRENT_POSITION)
 
 from phidias.Types import *
 from phidias.Main import *

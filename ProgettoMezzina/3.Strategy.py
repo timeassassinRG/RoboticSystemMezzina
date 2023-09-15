@@ -29,20 +29,21 @@ def_vars('X', 'Y', 'F')
 # ---------------------------------------------------------------------
 class main(Agent):
     def main(self):
-        go(X,Y) >> [ +go_to(X,Y)[{'to': 'robot@127.0.0.1:6566'}] ]
-
+        # per andare al prossimo checkpoint
+        go(X,Y) >> [ +go_to(X,Y)[{'to': 'robot@127.0.0.1:6566'}] ] 
+        # per aggiungere un punto alla coda di target
         add(X,Y) >> [ +queue_element(X,Y), show_line("Aggiunto (", X, ",", Y, ") alla coda di target."), \
                       +add_to(X,Y)[{'to': 'robot@127.0.0.1:6566'}]]
-        
+        # avviare il robot
         go() / queue_element(X,Y) >> [ -queue_element(X,Y), \
                                         go(X,Y), \
                                         show_line("Nuovo target: (", X, ",", Y, ")"),
                                         ]
-        
+        # pulire coda di target
         clear() / queue_element(X,Y) >> [ -queue_element(X,Y), \
                                           clear(), show_line("La coppia (", X, ",", Y, ") è stata cancellata."), \
                                           +clear_path()[{'to': 'robot@127.0.0.1:6566'}]]
-
+        # notificare il raggiungimento del target
         +target_reached()[{'from': F}] >> [ show_line("Target reached"), go()]
 
         

@@ -60,13 +60,12 @@ class AckermannRobot(RoboticSystem):
             if not self.target_reached:
                 self.target_reached = True
                 if self.phidias_agent != '':
-                    print("path planner deleting checkpoint: ", self.path_planner.checkpoints[0])
+                    print("ROBOT >> path planner reached checkpoint: ", self.path_planner.checkpoints[0])
+                    print("ROBOT >> path planner deleting checkpoint: ", self.path_planner.checkpoints[0])
                     self.path_planner.reached_checkpoint()
-                    print("checkpoint attuali: ", self.path_planner.checkpoints)  
-                    self.path_planner.clear_goals() 
-                    print("checkpoint attuali: ", self.path_planner.checkpoints)   
-                    print('Target reached, sending message to phidias agent')
+                    print('ROBOT >> Target reached, sending message to phidias agent')
                     Messaging.send_belief(self.phidias_agent, 'target_reached', [], 'robot')
+                    self.path_planner.clear_goals()
         return True
     
     def get_pose(self):
@@ -90,10 +89,10 @@ class AckermannRobot(RoboticSystem):
         if name == 'add_to':
             self.path_planner.add_goal(np.array([float(terms[0]), float(terms[1])]))
             self.path_planner._update_graph()
-            print("Aggiunto (", float(terms[0]), ",", float(terms[1]), ") alla coda di target.")
+            print("ROBOT >> Aggiunto (", float(terms[0]), ",", float(terms[1]), ") alla coda di target.")
         if name == 'clear_path':
-            self.path_planner.clear()
-            print("Percorso cancellato.")
+            self.path_planner.clear_goals()
+            print("ROBOT >> Percorso cancellato.")
     
 if __name__ == '__main__':
     cart_robot = AckermannRobot()

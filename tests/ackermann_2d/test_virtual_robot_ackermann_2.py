@@ -58,10 +58,13 @@ class AckermannRobot(RoboticSystem):
         self.plotter.add('y', y)
         self.plotter.add('x_target', x_target)
         self.plotter.add('y_target', y_target)
+        self.plotter.add('Torque', torque)
+        self.plotter.add('TorqueMax', self.speed_controller.saturation)
 
         if self.t > 10:
             self.plotter.plot ( [ 'x', 'X' ],
                                 [ [ 'y', 'Y'] ])
+            self.plotter.plot ( [ 't', 'Time' ], [ [ 'Torque', 'Torque'], ['TorqueMax','TorqueMax'] ])
             self.plotter.show()
             return False
 

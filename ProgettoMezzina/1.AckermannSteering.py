@@ -10,7 +10,7 @@ from lib.models.cart2d import AckermannSteering
 from lib.models.robot import RoboticSystem
 from lib.controllers.standard import PIDSat
 from lib.controllers.control2d import Polar2DController, StraightLine2DMotion, Path2D
-from lib.gui.gui_2d import CartWindow
+from lib.gui.gui_2d_Original import CartWindow
 from lib.data.plot import DataPlotter
 
 """
@@ -20,26 +20,28 @@ from lib.data.plot import DataPlotter
 """
 
 #definizione delle costanti fornite dal testo del progetto
-MASS = 15               # Massa del robot = 15kg
+MASS = 15.0             # Massa del robot = 15kg
 SLIDE = 0.2             # Largezza del robot = 20cm
 WHEEL_RADIUS = 0.03     # Raggio delle ruote = 3cm
 FRICTION = 0.7          # Coefficiente di attrito viscoso, 0.7;
-TORQUE_MAX = 20         # Coppia massima = 20Nm
+TORQUE_MAX = 20.0         # Coppia massima = 20Nm
 V_MAX = 0.2            # Velocità massima = 2m/s   
 ACC = 1.5                 # Accelerazione massima = 1.5m/s^2  (a piacere)
 DEC = 1.5                 # Decelerazione massima = 2.5m/s^2  (a piacere)
+
+_THRESHOLD = 0.01
 
 class AckermannRobot(RoboticSystem):
     def __init__(self):
         super().__init__(1e-3) # delta_t = 1e-3
         self.car = AckermannSteering(MASS, FRICTION, WHEEL_RADIUS, SLIDE)
         (self.car.x, self.car.y) = (0,0)
-        # aggiungiamo controller di velocità 20 Nm max, antiwindup
-        self.speed_controller = PIDSat(80, 10, 0, TORQUE_MAX, True)
+        # aggiungiamo il percorso
+        self.path_controller = Path2D(V_MAX, ACC, DEC, _THRESHOLD)
         # aggiungiamo controller di posizione
         self.polar_controller = Polar2DController(2.0, V_MAX, 12.0, math.pi/3)
-        # aggiungiamo il percorso
-        self.path_controller = Path2D(V_MAX, ACC, DEC, 0.01)
+        # aggiungiamo controller di velocità 20 Nm max, antiwindup
+        self.speed_controller = PIDSat(80, 10, 0, TORQUE_MAX, False)
         
         self.path_controller.set_path( [ (0.25, 0.1), (0.40, 0.25), (0.65, 0.30)] )
         (x,y,_) = self.get_pose()
@@ -47,8 +49,7 @@ class AckermannRobot(RoboticSystem):
         self.plotter = DataPlotter()
     
     def run(self):
-        pose = self.get_pose()
-        target = self.path_controller.evaluate(self.delta_t, pose)
+        target = self.path_controller.evaluate(self.delta_t, self.get_pose())
         if target is not None:
             (x_target, y_target) = target
             (vref, steering) = self.polar_controller.evaluate(self.delta_t, x_target, y_target, self.get_pose())
@@ -67,11 +68,13 @@ class AckermannRobot(RoboticSystem):
         self.plotter.add('x', x)
         self.plotter.add('y', y)
         self.plotter.add('Torque', torque)
+        self.plotter.add('TorqueMax', TORQUE_MAX)
         self.plotter.add('vref', vref)
         self.plotter.add('v', self.car.v)
     
         if self.t > 10:
             self.plot_data()
+            return False
         return True
     
     def plot_data(self):
@@ -83,7 +86,7 @@ class AckermannRobot(RoboticSystem):
                                                    [ 'y_target', 'Y Target']])
             
             #plot xtarget and ytarget and actual x and y
-            self.plotter.plot ( [ 't', 'Time' ], [ [ 'Torque', 'Torque'] ])
+            self.plotter.plot ( [ 't', 'Time' ], [ [ 'Torque', 'Torque'], ['TorqueMax','TorqueMax'] ])
             self.plotter.plot ( [ 't', 'Time' ], [ [ 'v', 'V' ],
                                                    [ 'vref', 'Vref'] ])
             self.plotter.show()  

@@ -30,13 +30,19 @@ class AckermannRobot(RoboticSystem):
     def __init__(self):
         super().__init__(1e-3) # delta_t = 1e-3
         self.car = AckermannSteering(MASS, FRICTION, WHEEL_RADIUS, SLIDE)
-        self.speed_controller = PIDSat(80, 10, 0, TORQUE_MAX, True) # aggiungiamo controller di velocità 20 Nm max, antiwindup 
+
+        # 20Nm of max torque, antiwindup
+        self.speed_controller = PIDSat(80, 10, 0, TORQUE_MAX, True)
+
+        # Path controller
         self.polar_controller = Polar2DController(2.0, V_MAX, 10.0, math.pi/3)
         self.path_controller = Path2D(V_MAX, ACC, DEC, 0.05)
         self.path_controller.set_path( [ (0, 0)] )
         (x,y,_) = self.get_pose()
         self.path_controller.start( (x,y) )
         self.target_reached = False
+
+        #networking
         self.phidias_agent = ''
         start_message_server_http(self)
         self.obstacle_points = ([(0.25, 0.35), (0.4, 0.05), (0.55, 0.25), (0.82, 0.15), (0.80, 0.35)])  # Lista per memorizzare i punti degli ostacoli

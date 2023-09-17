@@ -27,6 +27,20 @@ class Cart2DRobot(RoboticSystem):
         self.cart = TwoWheelsCart2DEncodersOdometry(20, 0.15, 0.8, 0.8,
                                                     0.025, 0.025, 0.2,
                                                     0.02, 0.02, 0.24, 2*math.pi/4000.0)
+        
+        # MASS = 15
+        # radius = 15 (non fornito)
+        # FRICTION = 0.8
+        # Traction_Wheels_Radius = 0.03
+        # wheelbase = 0.2
+        # Traction Wheels, radius = 2.5cm, wheelbase = 20cm
+        # Sensing Wheels, radius = 2cm, wheelbase = 24cm
+        # Encoder resolution = 4000 ticks/revolution
+        # self.cart = TwoWheelsCart2DEncodersOdometry(MASS, 0.15, FRICTION, FRICTION,
+                                                    # Traction_Wheels_Radius, Traction_Wheels_Radius, wheelbase,
+                                                    # 0.02, 0.02, 0.24, 2*math.pi/4000.0)
+        
+        
         self.plotter = DataPlotter()
         # 5 Nm of max torque, antiwindup
         self.left_controller = PIDSat(8.0, 3.0, 0.0, 5, True)

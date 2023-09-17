@@ -13,12 +13,6 @@ from lib.controllers.control2d import Polar2DController, StraightLine2DMotion, P
 from lib.gui.gui_2d_Original import CartWindow
 from lib.data.plot import DataPlotter
 
-"""
-    NEL SEGUENTE CODICE APRENDO LA GUI SARANNO PRESENTI DEGLI OSTACOLI, AL MOMENTO NON SONO PRESI IN COSIDERAZIONE
-    SONO PRESI IN CONSIDERAZIONE NEL CODICE 3.AckermannSteering+phidias.py.
-    Questo codice è per mostrare la taratura dei controllori
-"""
-
 #definizione delle costanti fornite dal testo del progetto
 MASS = 15.0             # Massa del robot = 15kg
 SLIDE = 0.2             # Largezza del robot = 20cm
@@ -29,7 +23,7 @@ V_MAX = 0.2            # Velocità massima = 2m/s
 ACC = 1.5                 # Accelerazione massima = 1.5m/s^2  (a piacere)
 DEC = 1.5                 # Decelerazione massima = 2.5m/s^2  (a piacere)
 
-_THRESHOLD = 0.01
+_THRESHOLD = 0.001 # per ottenere dei grafici migliori, nella pratica ho usato 0.05
 
 class AckermannRobot(RoboticSystem):
     def __init__(self):

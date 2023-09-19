@@ -23,7 +23,7 @@ V_MAX = 0.2            # Velocità massima = 2m/s
 ACC = 1.5                 # Accelerazione massima = 1.5m/s^2  (a piacere)
 DEC = 1.5                 # Decelerazione massima = 2.5m/s^2  (a piacere)
 
-_THRESHOLD = 0.001 # per ottenere dei grafici migliori, nella pratica ho usato 0.05
+THRESHOLD = 0.001 # per ottenere dei grafici migliori, nella pratica ho usato 0.05
 
 class AckermannRobot(RoboticSystem):
     def __init__(self):
@@ -31,7 +31,7 @@ class AckermannRobot(RoboticSystem):
         self.car = AckermannSteering(MASS, FRICTION, WHEEL_RADIUS, SLIDE)
         (self.car.x, self.car.y) = (0,0)
         # aggiungiamo il percorso
-        self.path_controller = Path2D(V_MAX, ACC, DEC, _THRESHOLD)
+        self.path_controller = Path2D(V_MAX, ACC, DEC, THRESHOLD)
         # aggiungiamo controller di posizione
         self.polar_controller = Polar2DController(2.0, V_MAX, 12.0, math.pi/3)
         # aggiungiamo controller di velocità 20 Nm max, antiwindup

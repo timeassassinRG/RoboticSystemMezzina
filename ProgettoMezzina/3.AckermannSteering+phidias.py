@@ -26,6 +26,8 @@ V_MAX = 0.2            # Velocità massima = 2m/s
 ACC = 1.5                 # Accelerazione massima = 1.5m/s^2  (a piacere)
 DEC = 1.5                 # Decelerazione massima = 2.5m/s^2  (a piacere)
 
+THRESHOLD = 0.05
+
 class AckermannRobot(RoboticSystem):
     def __init__(self):
         super().__init__(1e-3) # delta_t = 1e-3
@@ -36,7 +38,7 @@ class AckermannRobot(RoboticSystem):
 
         # Path controller
         self.polar_controller = Polar2DController(2.0, V_MAX, 10.0, math.pi/3)
-        self.path_controller = Path2D(V_MAX, ACC, DEC, 0.05)
+        self.path_controller = Path2D(V_MAX, ACC, DEC, THRESHOLD)
         self.path_controller.set_path( [ (0, 0)] )
         (x,y,_) = self.get_pose()
         self.path_controller.start( (x,y) )
@@ -84,14 +86,7 @@ class AckermannRobot(RoboticSystem):
         print(_from, name, terms)
         self.phidias_agent = _from
         if name == 'go_to':
-
-            #--------controllo facoltativo robot troppo vicino agli ostacoli------------
             goal = np.array([float(terms[0]), float(terms[1])])
-            if self.__is_goal_too_close_to_obstacles(goal): # permesso passare una distanza minima, di default si usa SLIDE/2
-                print("ROBOT >> Il punto assegnato è troppo vicino agli ostacoli. Fermato.")
-                return
-            #--------------------
-
             self.path_planner.add_goal(goal)
             self.path_planner._update_graph()
             path = self.path_planner.find_path()
@@ -101,7 +96,12 @@ class AckermannRobot(RoboticSystem):
             self.path_controller.start( (x,y) )
             self.target_reached = False
         if name == 'add_to':
-            self.path_planner.add_goal(np.array([float(terms[0]), float(terms[1])]))
+            goal = np.array([float(terms[0]), float(terms[1])])
+            checkpoint_tuples = [tuple(coords) for coords in self.path_planner.checkpoints]         
+            if tuple(goal) in checkpoint_tuples:
+                print("ROBOT >> Il punto assegnato è già presente nella coda. Rimosso.")
+                return
+            self.path_planner.add_goal(goal)
             self.path_planner._update_graph()
             print("ROBOT >> Aggiunto (", float(terms[0]), ",", float(terms[1]), ") alla coda di target.")
         if name == 'clear_path':
@@ -118,14 +118,6 @@ class AckermannRobot(RoboticSystem):
             self.path_controller.start( (x,y) )
             self.target_reached = False
             print("ROBOT >> Robot resettato.")
-    
-    def __is_goal_too_close_to_obstacles(self, goal, min_distance=SLIDE/2):
-        # Verifica se il goal è troppo vicino a ciascun ostacolo
-        for obstacle in self.obstacle_points:
-            distance = np.linalg.norm(goal - np.array(obstacle))
-            if distance < min_distance:
-                return True
-        return False
 
 if __name__ == '__main__':
     cart_robot = AckermannRobot()

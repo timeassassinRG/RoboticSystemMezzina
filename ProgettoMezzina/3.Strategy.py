@@ -47,7 +47,7 @@ class main(Agent):
                                           +clear_path()[{'to': 'robot@127.0.0.1:6566'}]]
         # notificare il raggiungimento del target
         +target_reached()[{'from': F}] >> [ show_line("Target reached"), go()]
-
+        # resetta il robot
         reset() >> [ +reset_robot()[{'to': 'robot@127.0.0.1:6566'}] ]
 
 

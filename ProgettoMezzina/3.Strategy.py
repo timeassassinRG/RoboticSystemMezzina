@@ -15,12 +15,15 @@ class go_to(Belief): pass
 class add_to(Belief): pass
 class queue_element(Belief): pass
 class clear_path(Belief): pass
+class reset_robot(Belief): pass
 
 class target_reached(Reactor): pass
 
 class add(Procedure): pass # aggiunte un punto in coda al percorso;
 class go(Procedure): pass  # avvia il robot facendo si che esso raggiunga i punti stabiliti secondo i diagrammi di Voronoi
 class clear(Procedure): pass # cancella i dati di un percorso precedentemente stabilito
+
+class reset(Procedure): pass # resetta il robot
 
 def_vars('X', 'Y', 'F')
 
@@ -30,12 +33,11 @@ def_vars('X', 'Y', 'F')
 class main(Agent):
     def main(self):
         # per andare al prossimo checkpoint
-        go(X,Y) >> [ +go_to(X,Y)[{'to': 'robot@127.0.0.1:6566'}] ] 
-        # per aggiungere un punto alla coda di target
+        go(X,Y) >> [ +go_to(X,Y)[{'to': 'robot@127.0.0.1:6566'}] ] #NB: dopo aver istanziato una coda, è preferibile non usare il comando go() passandogli dei parametri istantanei
         add(X,Y) >> [ +queue_element(X,Y), show_line("Aggiunto (", X, ",", Y, ") alla coda di target."), \
                       +add_to(X,Y)[{'to': 'robot@127.0.0.1:6566'}]]
         # avviare il robot
-        go() / queue_element(X,Y) >> [ -queue_element(X,Y), \
+        go() / queue_element(X,Y) >> [  -queue_element(X,Y), \
                                         go(X,Y), \
                                         show_line("Nuovo target: (", X, ",", Y, ")"),
                                         ]
@@ -46,7 +48,7 @@ class main(Agent):
         # notificare il raggiungimento del target
         +target_reached()[{'from': F}] >> [ show_line("Target reached"), go()]
 
-        
+        reset() >> [ +reset_robot()[{'to': 'robot@127.0.0.1:6566'}] ]
 
 
 ag = main()

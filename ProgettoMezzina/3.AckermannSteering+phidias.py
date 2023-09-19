@@ -84,7 +84,15 @@ class AckermannRobot(RoboticSystem):
         print(_from, name, terms)
         self.phidias_agent = _from
         if name == 'go_to':
-            self.path_planner.add_goal(np.array([float(terms[0]), float(terms[1])]))
+
+            #--------controllo facoltativo robot troppo vicino agli ostacoli------------
+            goal = np.array([float(terms[0]), float(terms[1])])
+            if self.__is_goal_too_close_to_obstacles(goal): # permesso passare una distanza minima, di default si usa SLIDE/2
+                print("ROBOT >> Il punto assegnato è troppo vicino agli ostacoli. Fermato.")
+                return
+            #--------------------
+
+            self.path_planner.add_goal(goal)
             self.path_planner._update_graph()
             path = self.path_planner.find_path()
             print(path)
@@ -99,7 +107,26 @@ class AckermannRobot(RoboticSystem):
         if name == 'clear_path':
             self.path_planner.clear_goals()
             print("ROBOT >> Percorso cancellato.")
+        if name == 'reset_robot':
+            self.path_planner.clear_goals()
+            self.path_planner.add_goal(np.array([0, 0]))
+            self.path_planner._update_graph()
+            path = self.path_planner.find_path()
+            print("ROBOT >> Andando alle cordinate (0,0)")
+            self.path_controller.set_path(path)
+            (x,y,_) = self.get_pose()
+            self.path_controller.start( (x,y) )
+            self.target_reached = False
+            print("ROBOT >> Robot resettato.")
     
+    def __is_goal_too_close_to_obstacles(self, goal, min_distance=SLIDE/2):
+        # Verifica se il goal è troppo vicino a ciascun ostacolo
+        for obstacle in self.obstacle_points:
+            distance = np.linalg.norm(goal - np.array(obstacle))
+            if distance < min_distance:
+                return True
+        return False
+
 if __name__ == '__main__':
     cart_robot = AckermannRobot()
     app = QApplication(sys.argv)
